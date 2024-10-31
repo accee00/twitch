@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:twitch/screens/home_screen.dart';
 import 'package:twitch/widgets/buttons.dart';
 import 'package:twitch/widgets/custom_textfield.dart';
+import 'package:twitch/resource/auth_meathod.dart';
 
 class SignupScreen extends StatefulWidget {
   static const routeName = '/signup';
@@ -15,6 +17,28 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _userNamecontroller = TextEditingController();
   bool _isPasswordVisible = false;
+  final AuthMethod _authMeathod = AuthMethod();
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _userNamecontroller.dispose();
+    super.dispose();
+  }
+
+  void signUpUser() async {
+    bool res = await _authMeathod.signUpUser(
+      context,
+      _emailController.text,
+      _userNamecontroller.text,
+      _passwordController.text,
+    );
+    if (!mounted) return;
+    if (res) {
+      Navigator.pushNamed(context, HomeScreen.routeName);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -43,7 +67,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 child: CustomTextfield(
                   obscureText: false,
                   controller: _emailController,
-                  hintText: 'abc@gmail.com',
+                  hintText: 'daveuk34@gmail.com',
                 ),
               ),
               const SizedBox(
@@ -103,7 +127,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ],
                 ),
               ),
-              CustomButtons(text: 'Sign Up', onTap: () {}),
+              CustomButtons(text: 'Sign Up', onTap: signUpUser),
             ],
           ),
         ),

@@ -1,6 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:twitch/resource/auth_meathod.dart';
+import 'package:twitch/screens/home_screen.dart';
 import 'package:twitch/widgets/buttons.dart';
 import 'package:twitch/widgets/custom_textfield.dart';
 
@@ -17,36 +17,24 @@ class _LogInScreenState extends State<LogInScreen> {
       TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  final AuthMethod _authMethod = AuthMethod();
+  @override
+  void dispose() {
+    _logInUserNamecontroller.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
-  Future<void> logInUserWithEmailAndPassword() async {
-    try {
-      final userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _logInUserNamecontroller.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-      print(userCredential);
-    } on FirebaseAuthException catch (e) {
-      if (!mounted) return;
-      print(e.message);
-      showDialog(
-          context: context,
-          builder: (context) {
-            return CupertinoAlertDialog(
-              title: const Text("Log In error"),
-              content: Text(
-                e.message.toString(),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text("Ok"),
-                )
-              ],
-            );
-          });
+  void loginUser() async {
+    bool res = await _authMethod.logInUser(
+      context,
+      _logInUserNamecontroller.text.trim(),
+      _passwordController.text.trim(),
+    );
+
+    if (!mounted) return;
+    if (res) {
+      Navigator.pushNamed(context, HomeScreen.routeName);
     }
   }
 
@@ -78,7 +66,7 @@ class _LogInScreenState extends State<LogInScreen> {
                 child: CustomTextfield(
                   obscureText: false,
                   controller: _logInUserNamecontroller,
-                  hintText: 'abc@gmail.com',
+                  hintText: 'david69@gmail.com',
                 ),
               ),
               const SizedBox(
@@ -121,10 +109,9 @@ class _LogInScreenState extends State<LogInScreen> {
                 ),
               ),
               CustomButtons(
-                  text: 'Log In',
-                  onTap: () async {
-                    await logInUserWithEmailAndPassword();
-                  })
+                text: 'Log In',
+                onTap: loginUser,
+              )
             ],
           ),
         ),
