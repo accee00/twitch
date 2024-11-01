@@ -33,14 +33,15 @@ class AuthMethod {
         password: password.trim(),
       );
       if (cred.user != null) {
-        final model.User user = model.User(
+        final model.Users user = model.Users(
           uid: cred.user!.uid,
           username: userName.trim(),
           email: email.trim(),
         );
         await _userRef.doc(cred.user!.uid).set(user.toMap());
-
-        Provider.of<UserProvider>(context, listen: false).setUser(user);
+        if (context.mounted) {
+          context.read<UserProvider>().setUser(user);
+        }
         result = true;
       }
     } on FirebaseAuthException catch (e) {
@@ -67,8 +68,10 @@ class AuthMethod {
         final snap = await _userRef.doc(cred.user!.uid).get();
         final userData = snap.data() as Map<String, dynamic>?;
         if (userData != null) {
-          final model.User user = model.User.fromMap(userData);
-          Provider.of<UserProvider>(context, listen: false).setUser(user);
+          final model.Users user = model.Users.fromMap(userData);
+          if (context.mounted) {
+            context.read<UserProvider>().setUser(user);
+          }
           result = true;
         }
       }
